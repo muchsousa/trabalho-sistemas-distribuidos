@@ -1,0 +1,34 @@
+version: '2'
+
+# * API: um serviço de API para ser consumido por aplicações.
+# * Banco de Dados: um banco de dados para ser consumido pela API
+# * Aplicação: Uma aplicaçãWo Web, consumindo a API
+
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    command: npm run dev 
+    volumes:
+      - ./api:/home/node/app
+    ports:
+      - 3000:3000
+
+  web: 
+    image: nginx
+    volumes: 
+      - ./web:/usr/share/nginx/html
+    ports:
+      - 8080:80
+
+  mongo:
+    image: mongo
+    security_opt:
+      - seccomp:unconfined
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+    ports:
+      - 27017:27017

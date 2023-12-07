@@ -1,0 +1,9 @@
+{
+    "mongo": {
+        "host": "mongo",
+        "port": "27017",
+        "username": "admin",
+        "password": "password",
+        "databaseName": "twitter_db"
+    }
+}

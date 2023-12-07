@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Twitter</title>
+    <style>
+        * { margin: 0; border: 0; padding: 0; }
+
+        body { background: #e1e1e1; }
+
+        #toolbar {
+            background: #1DA1F2;
+            width: 100%;
+            height: 60px;
+            line-height: 60px;
+            position: fixed;
+            top: 0;
+
+            font-size: 13px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        #main {
+            width: 800px;
+            margin: 80px auto 20px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #main #article {
+            width: 580px;
+        }
+
+        #main #article #form-tweet {
+            width: 100%;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+            border-bottom: 1px solid #ccc;
+        }
+
+        #main #article #form-tweet textarea {
+            width: 100%;
+            height: 90px;
+            border: 1px solid #ddd;
+            resize: none;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 10px;
+        }
+        
+        #main #article #form-tweet input[type=button] {
+            width: 100px;
+            height: 30px;
+            resize: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background: #1DA1F2;
+            color: #ffffff;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 480px;
+        }
+
+
+        #main #article ul#twitts {
+            list-style-type: none;
+        
+        }
+
+        #main #article ul#twitts li {
+            border: 1px solid #ccc;
+            background: #ffffff;
+            border-radius: 4px;
+            box-sizing: border-box;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #main #article ul#twitts li strong.username {
+            font-weight: bold;
+            color: #111;
+        }
+
+        #main #article ul#twitts li p {
+            color: #444;
+        }
+
+        #main #aside {
+            width: 190px;
+            height: 500px;            
+            border: 1px solid #CCC;
+            background: #ddd;
+            border-radius: 4px;
+        }
+
+    </style>
+</head>
+<body>
+    <div id="toolbar">
+        <h1>Twitter</h1>
+    </div>
+
+    <div id="main">
+        <div id="article">
+            <div id="form-tweet">
+                <form>
+                    <textarea placeholder="diga algo..."></textarea>
+                    <input type="button" value="Twittar" id="twittar_button" />
+                </form>
+            </div>
+
+            <ul id="twitts">
+                <!-- 
+                <li class="tweet">
+                    <strong class="username">@fulano</strong>
+                    <p>xalala </p>
+                </li> 
+                -->
+                
+            </ul>
+        </div>
+
+        <div id="aside"></div>
+    </div>
+
+<script>
+
+if (!localStorage.getItem('username')) {
+    const username = prompt('digite seu username');
+    localStorage.setItem('username', username);
+}
+
+let debounce = false;
+document.querySelector('#twittar_button').addEventListener('click', async () => {
+    if (debounce) return;
+
+    console.log('post tweet')
+
+    try {
+        const payload = {
+            username: localStorage.getItem('username') || '',
+            tweet: document.querySelector('#form-tweet textarea').value
+        }
+
+        const response = await fetch('http://localhost:3000/tweet', {
+            method: "POST",
+            mode: "cors",
+            body: JSON.stringify(payload),
+            headers: {"Content-type": "application/json; charset=UTF-8"}
+        });
+
+        const data = await response.json();
+
+        console.log('data', data)
+
+        getTweets();
+    } catch(error) {
+        console.log(error);
+    } finally {
+        debounce = true;
+    }
+
+})
+
+function getTweets() {
+    fetch('http://localhost:3000/tweet', {
+        method: "GET",
+        mode: "cors",
+        cache: "default",
+    })
+    .then(res => res.json())
+    .then(tweets => {
+        console.log('tweets', tweets);
+        
+        document.querySelector('ul#twitts').innerHTML = tweets.map(tweet => {
+            return `<li class="tweet">
+                    <strong>@${tweet.username}</strong>
+                    <p>${tweet.tweet}</p>
+                </li>`
+        }).join('');
+    })
+    .catch(console.error);
+}
+
+getTweets();
+
+</script>
+</body>
+</html>
